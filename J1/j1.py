@@ -4,11 +4,13 @@ DIGIT_SPELLED = ['one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
 def find_all_digits(text: str) -> list[int, int]:
     digits_array = []
     # Search spelled digits
-    if search_spelled_digits(text) is not None:
-        digits_array.extend(search_spelled_digits(text))
+    spelled_digits = search_spelled_digits(text)
+    if spelled_digits:
+        digits_array.extend(spelled_digits)
     # Search digits
-    if search_numeral_digits(text) is not None:
-        digits_array.extend(search_numeral_digits(text))
+    numeral_digits = search_numeral_digits(text)
+    if numeral_digits:
+        digits_array.extend(numeral_digits)
     # Sort digits by position
     digits_array.sort(key=lambda x: x[1])
     return digits_array
@@ -27,21 +29,11 @@ def search_spelled_digits(text: str) -> list[int, int]:
             else:
                 spelled_digits_array.append([DIGIT_SPELLED.index(word) + 1, index])
                 start_index = index + len(word)
-    if len(spelled_digits_array) == 0:
-        return None
-    else:
-        return spelled_digits_array
+    return spelled_digits_array
 
 
 def search_numeral_digits(text: str) -> list[int, int]:
-    numeral_digits_array = []
-    for index, caracter in enumerate(text):
-        if caracter.isdigit():
-            numeral_digits_array.append([int(caracter), index])
-    if len(numeral_digits_array) == 0:
-        return None
-    else:
-        return numeral_digits_array
+    return [[int(caracter), index] for index, caracter in enumerate(text) if caracter.isdigit()]
 
 
 def get_text_from_file(path: str) -> str:
