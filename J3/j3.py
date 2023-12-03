@@ -16,7 +16,8 @@ class PartNumber:
         self.is_symbol_close, self.symbol, self.symbol_coordinates = self.symbol_close(schematics_array)
 
     def __repr__(self) -> str:
-        return f"PartNumber(value: {self.value}, x: {self.x}, y: {self.y}, width: {self.width}, height: {self.height}, symbol_close: {self.is_symbol_close})"
+        return (f"PartNumber(value: {self.value}, x: {self.x}, y: {self.y}, \
+                width: {self.width}, height: {self.height}, symbol_close: {self.is_symbol_close})")
 
     def symbol_close(self, schematics_array: list[list[str]]) -> (bool, str):
         """return True if the symbol is close to the part number on the schematic."""
@@ -62,8 +63,6 @@ if __name__ == "__main__":
     print(sum(part_number.value for part_number in part_numbers_on_schematics if part_number.is_symbol_close))
     # Part 2 : find the gear, calculate the gear ratio and sum them
     potential_gears_on_schematics = [part_number for part_number in part_numbers_on_schematics if part_number.symbol == "*"]
-    print(potential_gears_on_schematics)
-    # if two gears are close to each other, they are part of the same gear
     gear_ratios = []
     for index, gear in enumerate(potential_gears_on_schematics):
         for other_gear in potential_gears_on_schematics[index + 1:]:
