@@ -52,11 +52,8 @@ def main():
     print(sum(scores))
     # Part 2
     for card in cards:
-        if card.get_number_of_winning_numbers_got() == 0:
-            continue
-        else:
-            for number in range(0, card.get_number_of_winning_numbers_got()):
-                cards.append(Card(cards[card.number+number].number, cards[card.number+number].winning_numbers, cards[card.number+number].numbers_got))
+        for number in range(0, card.get_number_of_winning_numbers_got()):
+            cards.append(Card(cards[card.number+number].number, cards[card.number+number].winning_numbers, cards[card.number+number].numbers_got))
     print(len(cards))
 
 
