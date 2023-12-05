@@ -1,6 +1,6 @@
 # 🎄🎄 Advent Of Code 2023 🎄🎄
 
-![](https://img.shields.io/badge/Days%20Completed%20%F0%9F%93%85-4/25-%2348792D)
+![](https://img.shields.io/badge/Days%20Completed%20%F0%9F%93%85-5/25-%2348792D)
 
 First year participation. It's Python 🐍.
 
