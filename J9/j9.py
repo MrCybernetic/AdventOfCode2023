@@ -33,21 +33,26 @@ class History:
 
     def _get_all_sequences_with_prediction(self) -> list:
         all_sequences_with_prediction = self.all_sequences.copy()
-        for index, sequence in enumerate(self.all_sequences):
+        for index, _ in enumerate(self.all_sequences):
             if index == 0:
-                all_sequences_with_prediction[len(self.all_sequences) - 1].append(0)
-                # for part 2
-                all_sequences_with_prediction[len(self.all_sequences) - 1].insert(0, 0)
+                index_of_last_sequence = len(self.all_sequences) - 1
+                # for part 1, add 0 to the end of the last sequence
+                all_sequences_with_prediction[index_of_last_sequence].append(0)
+                # for part 2, add 0 to the beginning of the last sequence
+                all_sequences_with_prediction[index_of_last_sequence].insert(0, 0)
             else:
-                all_sequences_with_prediction[len(self.all_sequences) - index - 1].append(
-                    all_sequences_with_prediction[len(self.all_sequences) - index][-1]
-                    + all_sequences_with_prediction[len(self.all_sequences) - index - 1][-1]
+                index_of_sequence_from_the_end = len(self.all_sequences) - index - 1
+                index_of_sequence_from_the_end_above = index_of_sequence_from_the_end + 1
+                # for part 1
+                all_sequences_with_prediction[index_of_sequence_from_the_end].append(
+                    all_sequences_with_prediction[index_of_sequence_from_the_end_above][-1]
+                    + all_sequences_with_prediction[index_of_sequence_from_the_end][-1]
                 )
                 # for part 2
-                all_sequences_with_prediction[len(self.all_sequences) - index - 1].insert(
+                all_sequences_with_prediction[index_of_sequence_from_the_end].insert(
                     0,
-                    all_sequences_with_prediction[len(self.all_sequences) - index - 1][0]
-                    - all_sequences_with_prediction[len(self.all_sequences) - index][0]
+                    all_sequences_with_prediction[index_of_sequence_from_the_end][0]
+                    - all_sequences_with_prediction[index_of_sequence_from_the_end_above][0]
                 )
 
         return all_sequences_with_prediction
