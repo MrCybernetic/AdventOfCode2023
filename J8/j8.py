@@ -75,7 +75,7 @@ def main() -> None:
     assert Document("J8/sample_test_3.txt").get_number_of_steps_to_finish_as_ghost() == 6
     print("    -test passed")
     print("  Result:")
-    print(f"    -> {input.get_number_of_steps_to_finish_as_ghost()}")
+    print(f"    -> {input.get_number_of_steps_to_finish_as_ghost()}")  # Failed... Bruteforce doesn't work
 
 
 if __name__ == "__main__":
