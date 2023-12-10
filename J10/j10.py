@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageDraw
 
 TILES = {"|": "vertical_pipe.png", "-": "horizontal_pipe.png", "L": "north_east.png",
          "J": "north_west.png", "7": "south_west.png", "F": "south_east.png", ".": "ground.png",
@@ -42,11 +42,40 @@ class Map:
                 tile_path = self._get_tile_image_path(x, y)
                 tile_img = Image.open(tile_path)
                 image.paste(tile_img, (x*TILE_WIDTH, y*TILE_HEIGHT))
-        image.save(path)
+        return image
 
     def get_max_distance_from_start(self, gif_generate: bool = False) -> int:
+        return self.looking_both_ways(gif_generate)[0]
+
+    def looking_both_ways(self, gif_generate: bool = False) -> (int, list):
         start_pos = self._get_start_pos()
         dict_map = self._get_dict_map()
+        two_way = self.get_first_pos_in_both_directions(start_pos, dict_map)
+        player1_pos = two_way[0]
+        player2_pos = two_way[1]
+        previous_pos1 = start_pos
+        previous_pos2 = start_pos
+        distance = 0
+        pos_already_visited = [start_pos, player1_pos, player2_pos]
+        images = []
+        image_count = 0
+        while player1_pos != player2_pos:
+            if gif_generate:
+                if image_count % 3 == 0:
+                    images.append(self.generate_gif_frame(player1_pos, player2_pos))
+                image_count += 1
+            next_pos1 = self.get_next_pos(previous_pos1, player1_pos, dict_map)
+            next_pos2 = self.get_next_pos(previous_pos2, player2_pos, dict_map)
+            distance += 1
+            previous_pos1 = player1_pos
+            previous_pos2 = player2_pos
+            player1_pos = next_pos1
+            player2_pos = next_pos2
+            pos_already_visited.append(player1_pos)
+            pos_already_visited.append(player2_pos)
+        return distance+1, pos_already_visited
+
+    def get_first_pos_in_both_directions(self, start_pos: (int, int), dict_map: dict) -> list:
         two_way = []
         # north
         if self.is_connected(start_pos, (start_pos[0], start_pos[1]-1), dict_map):
@@ -60,29 +89,7 @@ class Map:
         # west
         if self.is_connected(start_pos, (start_pos[0]-1, start_pos[1]), dict_map):
             two_way.append((start_pos[0]-1, start_pos[1]))
-        pos1 = two_way[0]
-        pos2 = two_way[1]
-        previous_pos1 = start_pos
-        previous_pos2 = start_pos
-        distance = 0
-        images = []
-        image_count = 0
-        while pos1 != pos2:
-            if gif_generate:
-                # append one image every 3 iterations
-                if image_count % 3 == 0:
-                    images.append(self.generate_gif_frame(pos1, pos2))
-                image_count += 1
-            next_pos1 = self.get_next_pos(previous_pos1, pos1, dict_map)
-            next_pos2 = self.get_next_pos(previous_pos2, pos2, dict_map)
-            distance += 1
-            previous_pos1 = pos1
-            previous_pos2 = pos2
-            pos1 = next_pos1
-            pos2 = next_pos2
-        if gif_generate:
-            self.generate_gif(images)
-        return distance+1
+        return two_way
 
     def generate_gif_frame(self, pos1: (int, int), pos2: (int, int)) -> list:
         pos1_path = "J10/tiles/player1.png"
@@ -144,14 +151,52 @@ class Map:
                     dict_map[(x, y)] = []
         return dict_map
 
+    def get_image_filled(self, image, coords, color) -> Image:
+        image_flooded = image.copy()
+        ImageDraw.floodfill(image_flooded, xy=coords, value=color)
+        return image_flooded
+
+    def get_first_player1_pos(self) -> (int, int):
+        return self.looking_both_ways()[1][3]
+
+    def get_number_of_tiles_for_part2(self) -> int:
+        spot_path = "J10/tiles/spot.png"
+        spot_img = Image.open(spot_path)
+        blue = (0, 0, 255)
+        image = self.get_image_filled(self.image, (1, 1), blue)
+        player1_pos_scaled = (self.get_first_player1_pos()[0]*TILE_WIDTH+TILE_WIDTH/2,
+                              self.get_first_player1_pos()[1]*TILE_HEIGHT+TILE_HEIGHT/2)
+        image = self.get_image_filled(image, player1_pos_scaled, blue)
+        count = 0
+        for y in range(0, len(self.map)*TILE_HEIGHT, TILE_HEIGHT):
+            for x in range(0, len(self.map[0])*TILE_WIDTH, TILE_WIDTH):
+                is_blue = False
+                for pixel_y in range(y, y+TILE_HEIGHT):
+                    for pixel_x in range(x, x+TILE_WIDTH):
+                        if image.getpixel((pixel_x, pixel_y)) == blue:
+                            is_blue = True
+                if not (is_blue):
+                    image.paste(spot_img, (x, y))
+                    count += 1
+        image.save(self.path[:-4]+"_part2"+".png")
+        # remove the start tile
+        count = count-1
+        return count
+
 
 def main():
+    map_test_1 = Map("J10/sample_test_1.txt")
+    map_test_2 = Map("J10/sample_test_2.txt")
+    map_test_3 = Map("J10/sample_test_3.txt")
+    map_puzzle_input = Map("J10/puzzle_input.txt")
     # Part1
-    assert (Map("J10/sample_test_1.txt").get_max_distance_from_start() == 4)
-    assert (Map("J10/sample_test_2.txt").get_max_distance_from_start() == 8)
-    print(Map("J10/puzzle_input.txt").get_max_distance_from_start())
-    # print(Map("J10/puzzle_input.txt").get_max_distance_from_start(gif_generate=True))
+    assert (map_test_1.get_max_distance_from_start() == 4)
+    assert (map_test_2.get_max_distance_from_start() == 8)
+    print(map_puzzle_input.get_max_distance_from_start())
+    # print(map_puzzle_input.get_max_distance_from_start(gif_generate=True))
     # Part2
+    assert (map_test_3.get_number_of_tiles_for_part2() == 10)
+    print(map_puzzle_input.get_number_of_tiles_for_part2())
 
 
 if __name__ == "__main__":
