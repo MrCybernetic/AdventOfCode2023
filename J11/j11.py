@@ -74,8 +74,6 @@ def main():
     image.expand_space()
     print(image.get_sum_of_distances())
     # Part 2
-    image_test = Image("J11/sample_test.txt")
-    image_test.expand_space(100)
     assert (image_test.get_sum_of_distances() == 8410)
     image_test = Image("J11/sample_test.txt")
     image_test.expand_space(10)
@@ -105,13 +103,12 @@ def main():
     image = Image("J11/puzzle_input.txt")
     image.expand_space(500)
     func.append((500, image.get_sum_of_distances()))
-    image = Image("J11/puzzle_input.txt")
     np_func = np.poly1d(np.polyfit([x[0] for x in func], [x[1] for x in func], 2))
+    print(np_func(1000000))
     plt.plot([x[0] for x in func], [x[1] for x in func], "o")
     plt.plot([x[0] for x in func], np_func([x[0] for x in func]))
     plt.yscale("log")
     plt.show()
-    print(np_func(1000000))
 
 
 if __name__ == "__main__":
