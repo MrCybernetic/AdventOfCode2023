@@ -12,6 +12,14 @@ class ConditionRecords:
             sum += row.get_number_of_possible_arrangements()
         return sum
 
+    def unfold(self, times: int):
+        for row in self.rows:
+            row.groups = row.groups * times
+            row.conditions.append('?')
+            row.conditions = row.conditions * times
+            row.conditions.pop()
+        return self
+
 
 class Row:
     def __init__(self, conditions: list, groups: list):
@@ -49,8 +57,13 @@ class Row:
 
 
 def main():
+    # Part 1
     assert ConditionRecords('J12/example.txt').get_sum_of_possible_arrangements() == 21
     print(ConditionRecords('J12/input.txt').get_sum_of_possible_arrangements())
+    # Part 2
+    unfolded_example = ConditionRecords('J12/example.txt').unfold(5)
+    assert unfolded_example.get_sum_of_possible_arrangements() == 525152  # CPU goes brrrrrrrrrrrrrrr
+    print(ConditionRecords('J12/input.txt').unfold(5).get_sum_of_possible_arrangements())
 
 
 if __name__ == '__main__':
