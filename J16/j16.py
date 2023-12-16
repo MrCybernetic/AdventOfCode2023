@@ -1,4 +1,12 @@
 from multiprocessing import Pool
+import PIL.Image as Image
+
+light_hor_img = Image.open("J16/light_horiz.png")
+light_ver_img = Image.open("J16/light_verti.png")
+mirror1_img = Image.open("J16/mirror1.png")
+mirror2_img = Image.open("J16/mirror2.png")
+splitter1_img = Image.open("J16/splitter1.png")
+splitter2_img = Image.open("J16/splitter2.png")
 
 
 class Tile:
@@ -42,7 +50,10 @@ class Cave:
                     if char != '\n':
                         self.cave[-1].append(Tile(char, len(self.cave[-1]), len(self.cave)-1))
         self.energised_tiles = []
+        self.energised_tiles_for_vizualizer = []
         self.memory = []
+        self.images = []
+        self.front_image = self.get_front_image()
 
     def __str__(self) -> str:
         string = ""
@@ -69,9 +80,10 @@ class Cave:
             else:
                 return []
 
-    def turn_light_on(self, start_beam: (int, int), previous_beam: (int, int)) -> None:
+    def turn_light_on(self, start_beam: (int, int), previous_beam: (int, int), vizualizer: bool = False) -> None:
         self.energised_tiles = [start_beam]
         stack = [(start_beam, previous_beam)]
+        vizualizer_frame = 0
         while stack:
             beam, previous_beam = stack.pop()
             if (beam, previous_beam) not in self.memory:
@@ -80,7 +92,13 @@ class Cave:
                 for next_beam in next_beams:
                     if next_beam not in self.energised_tiles:
                         self.energised_tiles.append(next_beam)
+                        self.energised_tiles_for_vizualizer.append((beam, next_beam))
+                        vizualizer_frame += 1
+                        if vizualizer and vizualizer_frame % 5 == 0:
+                            self.images.append(self.get_image())
                     stack.append((next_beam, beam))
+        if vizualizer:
+            self.images[0].save('J16/cave.gif', save_all=True, append_images=self.images[1:], optimize=False, duration=20, loop=0)
 
     def _turn_light_on_recursive(self, beam, previous_beam):
         if (beam, previous_beam) in self.memory:
@@ -105,6 +123,32 @@ class Cave:
 
     def number_of_energised_tiles(self):
         return len(self.energised_tiles)
+
+    def get_image(self):
+        img = Image.new('RGB', (len(self.cave[0])*5, len(self.cave)*5), (0, 0, 0))
+        for previous_tile, tile in self.energised_tiles_for_vizualizer:
+            if previous_tile[0] == tile[0]:
+                img.paste(light_ver_img, (tile[0]*5, tile[1]*5), light_ver_img)
+            elif previous_tile[1] == tile[1]:
+                img.paste(light_hor_img, (tile[0]*5, tile[1]*5), light_hor_img)
+            else:
+                img.paste(light_ver_img, (tile[0]*5, tile[1]*5), light_ver_img)
+        img.paste(self.front_image, (0, 0), self.front_image)
+        return img
+
+    def get_front_image(self) -> Image:
+        front_img = Image.new('RGBA', (len(self.cave[0])*5, len(self.cave)*5), (0, 0, 0, 0))
+        for y in range(len(self.cave)):
+            for x in range(len(self.cave[0])):
+                if self.cave[y][x].type == '|':
+                    front_img.paste(splitter2_img, (x*5, y*5), splitter2_img)
+                elif self.cave[y][x].type == '-':
+                    front_img.paste(splitter1_img, (x*5, y*5), splitter1_img)
+                elif self.cave[y][x].type == '/':
+                    front_img.paste(mirror2_img, (x*5, y*5), mirror2_img)
+                elif self.cave[y][x].type == '\\':
+                    front_img.paste(mirror1_img, (x*5, y*5), mirror1_img)
+        return front_img
 
 
 def get_max_number_of_energised_tile(cave_path: str):
@@ -134,16 +178,18 @@ def turn_light_on_for_tile(args):
 
 
 def main():
-    # Part 1
-    cave_test = Cave("J16/test.txt")
+    # # Part 1
+    # cave_test = Cave("J16/test.txt")
     cave = Cave("J16/input.txt")
-    cave_test.turn_light_on((0, 0), (-1, 0))
-    assert cave_test.number_of_energised_tiles()
-    cave.turn_light_on((0, 0), (-1, 0))
-    print("Part 1:", cave.number_of_energised_tiles())
-    # Part 2
-    assert get_max_number_of_energised_tile(cave_test.path) == 51
-    print("Part 2:", get_max_number_of_energised_tile(cave.path))
+    # cave_test.turn_light_on((0, 0), (-1, 0))
+    # assert cave_test.number_of_energised_tiles()
+    # cave.turn_light_on((0, 0), (-1, 0))
+    # print("Part 1:", cave.number_of_energised_tiles())
+    # # Part 2
+    # assert get_max_number_of_energised_tile(cave_test.path) == 51
+    # print("Part 2:", get_max_number_of_energised_tile(cave.path))
+    # create vizualizer
+    cave.turn_light_on((0, 0), (-1, 0), vizualizer=True)
 
 
 if __name__ == "__main__":
