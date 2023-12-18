@@ -1,7 +1,7 @@
 # 🎄🎄 Advent Of Code 2023 🎄🎄
 
-![](https://img.shields.io/badge/Days%20%F0%9F%93%85-17/25-%2348792D)
-![](https://img.shields.io/badge/Stars%20%E2%AD%90-27/34-%23FFC83D)
+![](https://img.shields.io/badge/Days%20%F0%9F%93%85-18/25-%2348792D)
+![](https://img.shields.io/badge/Stars%20%E2%AD%90-28/36-%23FFC83D)
 
 First year participation. It's Python 🐍.
 
